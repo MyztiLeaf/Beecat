@@ -115,7 +115,6 @@ public static class BupHook
     public static void Apply()
     {
         On.Player.Update += BupsAI;
-        IL.HUD.FoodMeter.ctor += BupsFood;
         IL.VoidSea.VoidSeaScene.Update += VoidSeaScene_Update;
         IL.GhostCreatureSedater.Update += GhostCreatureSedater_Update;
         On.OracleBehavior.CheckSlugpupsInRoom += OracleBehavior_CheckSlugpupsInRoom;
@@ -127,8 +126,30 @@ public static class BupHook
         _ = new Hook(typeof(StoryGameSession).GetProperty(nameof(StoryGameSession.slugPupMaxCount))!.GetGetMethod(), StoryGameSession_slugPupMaxCount_get);
         IL.SaveState.SessionEnded += SaveState_SessionEnded;
         On.Player.CanMaulCreature += Player_CanMaulCreature;
-    }   
+        On.MoreSlugcats.SlugNPCAI.IUseARelationshipTracker_CreateTrackedCreatureState += SlugNPCAI_IUseARelationshipTracker_CreateTrackedCreatureState;
 
+        _ = new ILHook(typeof(HUD.FoodMeter).GetMethod("TrySpawnPupBars"), FoodMeter_TrySpawnPupBars);
+    }
+
+    private static void FoodMeter_TrySpawnPupBars(ILContext il)
+    {
+        var cursor = new ILCursor(il);
+
+        var loc = 0;
+        cursor.GotoNext(MoveType.After,
+            i => i.MatchLdloc(out loc),
+            i => i.MatchCallOrCallvirt(out _),
+            i => i.MatchLdfld<AbstractCreature>(nameof(AbstractCreature.creatureTemplate)),
+            i => i.MatchLdfld<CreatureTemplate>(nameof(CreatureTemplate.type)),
+            i => i.MatchLdsfld<MoreSlugcatsEnums.CreatureTemplateType>(nameof(MoreSlugcatsEnums.CreatureTemplateType.SlugNPC)),
+            i => i.MatchCallOrCallvirt(typeof(ExtEnum<CreatureTemplate.Type>).GetMethod("op_Equality")));
+
+        cursor.MoveAfterLabels();
+        cursor.Emit(OpCodes.Ldarg_0);
+        cursor.Emit(OpCodes.Ldloc, loc);
+        cursor.EmitDelegate((FoodMeter self, int i) => ((Player)self.hud.owner).abstractCreature.Room.creatures[i].creatureTemplate.type == BeeEnums.CreatureType.Bup);
+        cursor.Emit(OpCodes.Or);
+    }
     private static bool Player_CanMaulCreature(On.Player.orig_CanMaulCreature orig, Player self, Creature crit)
     {
         var result = orig(self, crit);
@@ -324,26 +345,22 @@ public static class BupHook
         cursor.Emit(OpCodes.Or);
     }
 
-    private static void BupsFood(ILContext il)
+    private static RelationshipTracker.TrackedCreatureState SlugNPCAI_IUseARelationshipTracker_CreateTrackedCreatureState(On.MoreSlugcats.SlugNPCAI.orig_IUseARelationshipTracker_CreateTrackedCreatureState orig, SlugNPCAI self, RelationshipTracker.DynamicRelationship rel)
     {
-        var cursor = new ILCursor(il);
-
-        var loc = 0;
-        cursor.GotoNext(MoveType.After,
-            i => i.MatchLdloc(out loc),
-            i => i.MatchCallOrCallvirt(out _),
-            i => i.MatchLdfld<AbstractCreature>(nameof(AbstractCreature.creatureTemplate)),
-            i => i.MatchLdfld<CreatureTemplate>(nameof(CreatureTemplate.type)),
-            i => i.MatchLdsfld<MoreSlugcatsEnums.CreatureTemplateType>(nameof(MoreSlugcatsEnums.CreatureTemplateType.SlugNPC)),
-            i => i.MatchCallOrCallvirt(typeof(ExtEnum<CreatureTemplate.Type>).GetMethod("op_Equality")));
-
-        cursor.MoveAfterLabels();
-        cursor.Emit(OpCodes.Ldarg_0);
-        cursor.Emit(OpCodes.Ldloc, loc);
-        cursor.EmitDelegate((FoodMeter self, int i) => ((Player)self.hud.owner).abstractCreature.Room.creatures[i].creatureTemplate.type == BeeEnums.CreatureType.Bup);
-        cursor.Emit(OpCodes.Or);
+        if (self.creature.type.value == "Bup")
+        {
+            CreatureTemplate.Relationship currentRelationship = rel.currentRelationship;
+            Creature realizedCreature = rel.trackerRep.representedCreature.realizedCreature;
+            if (realizedCreature is Player PL && PL.slugcatStats.name == BeeEnums.SnowFlake)
+            {
+                currentRelationship.intensity = 1f;
+                currentRelationship.type = CreatureTemplate.Relationship.Type.Pack;
+                self.followCloseness = 1;
+                self.SetDestination(PL.abstractCreature.pos);
+            }
+        }
+        return orig(self, rel);
     }
-
     private static void BupsAI(On.Player.orig_Update orig, Player self, bool eu)
     {
         orig(self, eu);
@@ -355,7 +372,7 @@ public static class BupHook
             if (self.Template.type.value == "Bup")
             {
                 var ai = self.AI;
-                // -- snowbups
+                // -- allowing snowbups to follow snowflake, allowing to have snowflake ability.
                 if (self.Bee().SnowBup)
                 {
                     if (self.Bee().effecttime > 0)

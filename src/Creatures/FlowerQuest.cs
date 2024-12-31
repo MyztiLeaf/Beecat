@@ -1,8 +1,9 @@
-﻿namespace SnowyWorld;
-public static class FlowerQuest
+﻿using BeeWorld;
+using SlugBase.SaveData;
+namespace Beeworld;
+public static class FlowerQuests
 {
-    private static bool GWBF;
-
+    public static Quest huh;
     public static void Apply()
     {
         On.Player.Update += Player_Update;
@@ -11,30 +12,82 @@ public static class FlowerQuest
     private static void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
     {
         orig(self, eu);
-        if (!GWBF && self.room.world.game.cameras[0].room != null && self.room.world.game.cameras[0].room.abstractRoom.name == "beeflowergw" || self.room.world.game.cameras[0].room.abstractRoom.name == "BeeFlowerGW")
+        if (self.room != null && self.room.world.game.cameras[0].room != null && !BeeOptions.VanillaType.Value && self.room.world.game.session is StoryGameSession session && ModManager.MSC && self.room.game.StoryCharacter == BeeEnums.Beecat)
         {
-            GWBF = true;
-            self.room.AddObject(new Quest(new Vector2(439f, 522), "[Walk Speed Increased]"));
+            var Data = session.saveState.miscWorldSaveData.GetSlugBaseData();
+            if (self.room.updateList.OfType<Quest>().Any()) return;
+            switch (self.room.abstractRoom.name.ToLower())
+            {
+                case "hi_b02":
+                    if (Data.TryGet("HI", out bool HI) || HI) break;
+                    self.room.AddObject(new Quest(new Vector2(535, 1370), "HI", "Speed"));
+                    break;
+                case "si_beeflower":
+                    if (Data.TryGet("SI", out bool SI) || SI) return;
+                    self.room.AddObject(new Quest(new Vector2(344, 516), "SI", "StingDMG"));
+                    break;
+                case "ss_lab11":
+                    if (Data.TryGet("SS", out bool SS) || SS) return;
+                    self.room.AddObject(new Quest(new Vector2(264, 154), "SS", "VerticalFly"));
+                    break;
+                case "su_a40":
+                    if (Data.TryGet("SS", out bool SU) || SU) return;
+                    self.room.AddObject(new Quest(new Vector2(824, 655), "SU", "StingDMG"));
+                    break;
+                case "sb_gor02":
+                    if (Data.TryGet("SB", out bool SB) || SB) return;
+                    self.room.AddObject(new Quest(new Vector2(202, 494), "SB", "StingDMG"));
+                    break;
+                case "ds_a01":
+                    if (Data.TryGet("DS", out bool DS) || DS) return;
+                    self.room.AddObject(new Quest(new Vector2(263, 373), "DS", "Speed"));
+                    break;
+                case "sh_a10":
+                    if (Data.TryGet("DS", out bool SH) || SH) return;
+                    self.room.AddObject(new Quest(new Vector2(885, 615), "SH", "Speed"));
+                    break;
+                case "lm_edge02":
+                    if (Data.TryGet("LM", out bool LM) || LM) return;
+                    self.room.AddObject(new Quest(new Vector2(1643, 1221), "LM", "WingSpeed"));
+                    break;
+                case "lf_f02":
+                    if (Data.TryGet("LF", out bool LF) || LF) return;
+                    self.room.AddObject(new Quest(new Vector2(1945, 2034), "LF", "WingSpeed"));
+                    break;
+                case "cc_sump05":
+                    if (Data.TryGet("CC", out bool CC) || CC) return;
+                    self.room.AddObject(new Quest(new Vector2(3463, 1162), "CC", "WingSpeed"));
+                    break;
+                case "gw_tower15":
+                    if (Data.TryGet("GW", out bool GW) || GW) return;
+                    self.room.AddObject(new Quest(new Vector2(2366, 1075), "GW", "Speed"));
+                    break;
+                case "uw_j01":
+                    if (Data.TryGet("UW", out bool UW) || UW) return;
+                    self.room.AddObject(new Quest(new Vector2(683, 1153), "UW", "StingDMG"));
+                    break;
+                case "dm_u06":
+                    if (Data.TryGet("UW", out bool DM) || DM) return;
+                    self.room.AddObject(new Quest(new Vector2(3642, 254), "DM", "StingDMG"));
+                    break;
+                default:
+                    break;
+            }
         }
-        /*if (self.input[0].pckp && !self.input[1].pckp)
-        {
-            self.room.AddObject(new Quest(new Vector2(self.firstChunk.pos.x+ 50, self.firstChunk.pos.y), "[Walk Speed Increased]"));
-        }*/
     }
-
-    
 }
 public class Quest : CosmeticSprite
 {
     private bool collected, wawaF, startup;
     private float wawa, timer, speed, wa;
-    private readonly string Message;
+    private readonly string Region, power;
 
-    public Quest(Vector2 pos, string Message)
+    public Quest(Vector2 pos, string region, string power)
     {
         this.pos = pos;
         lastPos = pos;
-        this.Message = Message;
+        this.Region = region;
+        this.power = power;
     }
     public override void Update(bool eu)
     {
@@ -53,12 +106,38 @@ public class Quest : CosmeticSprite
             }
         }
         speed += 0.1f;
-        //Debug.Log("IM ON");
 
         if (PlayerPL != null && !collected)
         {
             collected = true;
-            room.game.cameras[0].hud.textPrompt.AddMessage(Message, 0, 100, true, false);
+            if (room != null && room.world.game.session is StoryGameSession session)
+            {
+                var Data = session.saveState.miscWorldSaveData.GetSlugBaseData();
+                if (power == "Speed")
+                {
+                    Data.TryGet("Speed", out int check);
+                    Data.Set("Speed", check+1);
+                    room.game.cameras[0].hud.textPrompt.AddMessage("Speed Increased!", 0, 100, true, false);
+                }
+                if (power == "WingSpeed")
+                {
+                    Data.TryGet("WingSpeed", out int check);
+                    Data.Set("WingSpeed", check+1);
+                    room.game.cameras[0].hud.textPrompt.AddMessage("WingSpeed Increased!", 0, 100, true, false);
+                }
+                if (power == "StingDMG")
+                {
+                    Data.TryGet("StingDMG", out float check);
+                    Data.Set("StingDMG", check + 0.2f);
+                    room.game.cameras[0].hud.textPrompt.AddMessage("Sting Damage Increased!", 0, 100, true, false);
+                }
+                if (power == "VerticalFly")
+                {
+                    Data.Set("VerticalFly", true);
+                    room.game.cameras[0].hud.textPrompt.AddMessage("Vertical Fly Unlocked!", 0, 100, true, false);
+                }
+                Data.Set(Region, true);
+            }
         }
         if (wawa > 0 && wawaF)
         {

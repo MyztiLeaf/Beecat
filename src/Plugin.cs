@@ -5,6 +5,7 @@ using BeeWorld.Hooks;
 using System.IO;
 using Fisobs.Core;
 using wa;
+using Beeworld;
 
 [module: UnverifiableCode]
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -18,9 +19,9 @@ public class Plugin : BaseUnityPlugin
 {
     public const string MOD_ID = "beeworld";
     public const string MOD_NAME = "Beecat";
-    public const string VERSION = "1.4.3";
+    public const string VERSION = "1.5.0";
     public const string AUTHORS = "Vigaro, MyztiLeaf";
-        
+
     private void OnEnable()
     {
         On.RainWorld.OnModsInit += RainWorld_OnOnModsInit;
@@ -56,6 +57,7 @@ public class Plugin : BaseUnityPlugin
             Futile.atlasManager.LoadAtlas("atlases/HoneyComb");
             Futile.atlasManager.LoadImage("atlases/beecatstinger");
             Futile.atlasManager.LoadImage("atlases/bups");
+            Futile.atlasManager.LoadImage("atlases/box");
 
             TailTexture = new Texture2D(150, 75, TextureFormat.ARGB32, false);
             var tailTextureFile = AssetManager.ResolveFilePath("textures/beecattail.png");
@@ -83,6 +85,8 @@ public class Plugin : BaseUnityPlugin
             if (ModManager.MSC)
             {
                 Content.Register(new BupCritob());
+                IteratorMiscHooks.Apply();
+                FlowerQuests.Apply();
             }
 
             Debug.Log($"Plugin {MOD_ID} is loaded!");

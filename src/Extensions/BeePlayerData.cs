@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using SlugBase.DataTypes;
+using SlugBase.SaveData;
 
 namespace BeeWorld.Extensions;
 
@@ -22,7 +23,7 @@ public class BeePlayerData
 
     public int WingStaminaMax => (int)(UnlockedExtraStamina ? (int)(WingStaminaMaxBase * 1.6f) : WingStaminaMaxBase);
     public float WingStaminaRecovery => UnlockedExtraStamina ? WingStaminaRecoveryBase * 1.2f : WingStaminaRecoveryBase;
-    public float WingSpeed => UnlockedFasterWings ? WingSpeedBase * 1.3f : WingSpeedBase * (Adrenaline * 0.2f);
+    public float WingSpeed => UnlockedFasterWings ? WingSpeedBase * 1.3f : WingSpeedBase + Mathf.Lerp(0, 8, Adrenaline / 20);
     public float WingSpeedFly => UnlockedFasterWings ? WingSpeedBase * 1.3f : WingSpeedBase;
 
     public bool UnlockedExtraStamina = false;
@@ -46,6 +47,7 @@ public class BeePlayerData
     public int preventFlight;
     public int lastTail;
     public bool stingerUsed;
+    public bool iteratormet;
 
     public int initialWingSprite;
     public int antennaeSprite;
@@ -115,9 +117,31 @@ public class BeePlayerData
         lastTail = -1;
         wingStamina = WingStaminaMax;
         timeSinceLastFlight = 200;
+
+        if (player.room.world.game.session is StoryGameSession session)
+        {
+            var Data = session.saveState.miscWorldSaveData.GetSlugBaseData();
+            if (!Data.TryGet("Speed", out int Speed) || Speed >= 0)
+            {
+                Data.Set("Speed", Speed); 
+            }
+            if (!Data.TryGet("WingSpeed", out int WingSpeed) || WingSpeed >= 0)
+            {
+                Data.Set("WingSpeed", WingSpeed); 
+            }
+            if (!Data.TryGet("StingDMG", out float StingDMG) || StingDMG >= 0)
+            {
+                Data.Set("StingDMG", StingDMG);
+            }
+            if (!Data.TryGet("VerticalFly", out bool VerticalFly) || !VerticalFly)
+            {
+                Data.Set("VerticalFly", VerticalFly); 
+            }
+        }
     }
 
-    ~BeePlayerData() {
+
+    ~BeePlayerData() {      
         try
         {
             TailAtlas.Unload();
@@ -229,6 +253,8 @@ public class BeePlayerData
                player.animation != Player.AnimationIndex.VineGrab &&
                player.animation != Player.AnimationIndex.ZeroGPoleGrab;
     }
+
+
 
     public int WingSprite(int side, int wing)
     {

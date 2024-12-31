@@ -58,7 +58,7 @@
 		"food_min": 5,
 		"food_max": 11,
 		"world_state": [ "Spear", "Red" ],
-		"start_room": [ "SI_S06", "SI_S05" ],
+		"start_room": [ "Z3_SBC01", "SI_S05", "SI_S06" ],
 
 		"select_menu_scene": "slugcat_bee",
 		"select_menu_scene_ascended": "ghost_bee",

@@ -1,4 +1,5 @@
 ﻿using BeeWorld.Extensions;
+using SlugBase.SaveData;
 
 namespace BeeWorld.Hooks;
 
@@ -23,9 +24,19 @@ public static class PlayerFlightHooks
         const float flightGravity = 0.12f;
         const float flightAirFriction = 0.7f;
         const float flightKickinDuration = 6f;
-        
+        int speedfly = 0;
+        bool vertical = false;
+        if (self.room.world.game.session is StoryGameSession session && !BeeOptions.VanillaType.Value)
+        {
+            var Data = session.saveState.miscWorldSaveData.GetSlugBaseData();
+            Data.TryGet("WingSpeed", out int check);
+            Data.TryGet("VerticalFly", out bool Vertical);
+            vertical = Vertical;
+            speedfly = check;
+        }
         if (bee.CanFly)
         {
+            
             if (self.animation == Player.AnimationIndex.HangFromBeam)
             {
                 bee.preventFlight = 15;
@@ -49,12 +60,12 @@ public static class PlayerFlightHooks
 
                 if (self.input[0].x > 0)
                 {
-                    self.bodyChunks[0].vel.x += bee.WingSpeed;
+                    self.bodyChunks[0].vel.x += bee.WingSpeed + speedfly;
                     self.bodyChunks[1].vel.x -= 1f;
                 }
                 else if (self.input[0].x < 0)
                 {
-                    self.bodyChunks[0].vel.x -= bee.WingSpeed;
+                    self.bodyChunks[0].vel.x -= bee.WingSpeed + speedfly;
                     self.bodyChunks[1].vel.x += 1f;
                 }
 
@@ -62,25 +73,25 @@ public static class PlayerFlightHooks
                 {
                     if (self.input[0].y > 0)
                     {
-                        self.bodyChunks[0].vel.y += bee.WingSpeed;
+                        self.bodyChunks[0].vel.y += bee.WingSpeed + speedfly;
                         self.bodyChunks[1].vel.y -= 1f;
                     }
                     else if (self.input[0].y < 0)
                     {
-                        self.bodyChunks[0].vel.y -= bee.WingSpeed;
+                        self.bodyChunks[0].vel.y -= bee.WingSpeed + speedfly;
                         self.bodyChunks[1].vel.y += 1f;
                     }
                 }
-                else if (bee.UnlockedVerticalFlight)
+                else if (bee.UnlockedVerticalFlight || vertical)
                 {
                     if (self.input[0].y > 0)
                     {
-                        self.bodyChunks[0].vel.y += bee.WingSpeedFly + (bee.Adrenaline * 0.5f) * 0.75f;
+                        self.bodyChunks[0].vel.y += bee.WingSpeedFly + speedfly + (bee.Adrenaline * 0.5f) * 0.75f;
                         self.bodyChunks[1].vel.y -= 0.3f;
                     }
                     else if (self.input[0].y < 0)
                     {
-                        self.bodyChunks[0].vel.y -= bee.WingSpeedFly + (bee.Adrenaline * 0.2f);
+                        self.bodyChunks[0].vel.y -= bee.WingSpeedFly + speedfly + (bee.Adrenaline * 0.2f);
                         self.bodyChunks[1].vel.y += 0.3f;
                     }
                 }

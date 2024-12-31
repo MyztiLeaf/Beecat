@@ -4,6 +4,7 @@ using Fisobs.Sandbox;
 using Fisobs.Properties;
 using BeeWorld;
 using BeeWorld.Extensions;
+using SlugBase.SaveData;
 
 namespace wa;
 
@@ -247,6 +248,15 @@ public class HoneyFood
             self.dynamicRunSpeed[0] = sped;
             self.dynamicRunSpeed[1] = sped;
         }
+        if (!self.IsBee(out var bee)) return;
+        if (self != null && self.room.world.game.session is StoryGameSession session && !BeeOptions.VanillaType.Value)
+        {
+            var Data = session.saveState.miscWorldSaveData.GetSlugBaseData();
+            Data.TryGet("Speed", out int check);
+            self.dynamicRunSpeed[0] += check;
+            self.dynamicRunSpeed[1] += check;
+        }
+            
     }
 
     private void Player_Jump(On.Player.orig_Jump orig, Player self)

@@ -1,4 +1,5 @@
 ﻿using BeeWorld.Extensions;
+using SlugBase.SaveData;
 
 namespace BeeWorld.Hooks;
 
@@ -57,13 +58,20 @@ public static class PlayerCombatHooks
         {
             bee.stingerAttackCounter--;
         }
-
+        float DMG = 0;
+        if (self.room.world.game.session is StoryGameSession session && !BeeOptions.VanillaType.Value)
+        {
+            session.saveState.miscWorldSaveData.GetSlugBaseData().TryGet("StingDMG", out float check);
+            DMG = check;
+        }
         if (bee.stingerAttackCounter == 0 && bee.stingerTargetChunk != null)
         {
+            
+            
             if (bee.stingerTargetChunk?.owner is Creature target && !target.dead)
             {
                 self.room.PlaySound(SoundID.Spear_Stick_In_Creature, bee.stingerTargetChunk);
-                target.Violence(self.bodyChunks[1], (bee.stingerTargetChunk.pos - self.bodyChunks[1].pos).normalized, bee.stingerTargetChunk, null, Creature.DamageType.Stab, (self.isNPC && self.Template.type.value == "Bup") ? 0.2f + bee.beepupatk : 0.2f, 800);
+                target.Violence(self.bodyChunks[1], (bee.stingerTargetChunk.pos - self.bodyChunks[1].pos).normalized, bee.stingerTargetChunk, null, Creature.DamageType.Stab, (self.isNPC && self.Template.type.value == "Bup") ? 0.2f + bee.beepupatk : 0.2f + DMG, 800);
                 bee.stingerUsed = !BeeOptions.UnlimitedStingers.Value;
             }
         }

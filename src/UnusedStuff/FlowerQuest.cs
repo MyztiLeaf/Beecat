@@ -1,4 +1,5 @@
-﻿namespace BeeWorld;
+﻿
+namespace BeeWorld;
 
 public class FlowerQuest
 {
