@@ -67,8 +67,24 @@ public static class FlowerQuests
                     self.room.AddObject(new Quest(new Vector2(683, 1153), "UW", "StingDMG"));
                     break;
                 case "dm_u06":
-                    if (Data.TryGet("UW", out bool DM) || DM) return;
+                    if (Data.TryGet("DM", out bool DM) || DM) return;
                     self.room.AddObject(new Quest(new Vector2(3642, 254), "DM", "StingDMG"));
+                    break;
+                case "z3_a35":
+                    if (Data.TryGet("Z3", out bool Z3) || Z3) return;
+                    self.room.AddObject(new Quest(new Vector2(626, 398), "Z3", "StingDMG"));
+                    break;
+                case "z2_a37":
+                    if (Data.TryGet("Z2", out bool Z2) || Z2) return;
+                    self.room.AddObject(new Quest(new Vector2(2804, 514), "Z2", "WingSpeed"));
+                    break;
+                case "z4_a09":
+                    if (Data.TryGet("Z4", out bool Z4) || Z4) return;
+                    self.room.AddObject(new Quest(new Vector2(146, 175), "Z4", "WingSpeed"));
+                    break;
+                case "z5_b04":
+                    if (Data.TryGet("Z5", out bool Z5) || Z5) return;
+                    self.room.AddObject(new Quest(new Vector2(884, 192), "Z5", "Speed"));
                     break;
                 default:
                     break;
