@@ -104,8 +104,6 @@ public class BupCritob : Critob
         s.EatenBy(CreatureTemplate.Type.MirosBird, 0.6f);
         s.HasDynamicRelationship(CreatureTemplate.Type.Scavenger, 1f);
         s.EatenBy(CreatureTemplate.Type.BigSpider, 0.6f);
-        s.Fears(MoreSlugcatsEnums.CreatureTemplateType.MirosVulture, 1f);
-        s.EatenBy(MoreSlugcatsEnums.CreatureTemplateType.MirosVulture, 0.6f);
         s.Eats(MoreSlugcatsEnums.CreatureTemplateType.FireBug, 0.5f);
     }
 }
