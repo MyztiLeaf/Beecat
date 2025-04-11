@@ -10,7 +10,6 @@ using Beeworld;
 [module: UnverifiableCode]
 #pragma warning disable CS0618 // Type or member is obsolete
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
-#pragma warning restore CS0618 // Type or member is obsolete
 
 namespace BeeWorld;
 
@@ -22,7 +21,7 @@ public class Plugin : BaseUnityPlugin
     public const string VERSION = "1.5.0";
     public const string AUTHORS = "Vigaro, MyztiLeaf";
 
-    private void OnEnable()
+    public void OnEnable()
     {
         On.RainWorld.OnModsInit += RainWorld_OnOnModsInit;
         On.RainWorld.OnModsDisabled += RainWorld_OnModsDisabled;
@@ -74,7 +73,6 @@ public class Plugin : BaseUnityPlugin
             PlayerFlightHooks.Apply();
             PlayerCombatHooks.Apply();
             PlayerGraphicsHooks.Apply();
-            //BupHooks.Apply();
             //RoomHooks.Init();
             //SaveDataHooks.Init();
             //WorldHooks.Init();

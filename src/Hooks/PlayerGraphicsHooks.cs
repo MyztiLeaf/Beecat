@@ -320,6 +320,7 @@ public static class PlayerGraphicsHooks
         var stripeColor = bee.StripeColor;
 
         sLeaser.sprites[2].color = Color.white;
+        sLeaser.sprites[2].shader = FShader.defaultShader;
 
         //-- Antennae stuff
 
@@ -357,6 +358,7 @@ public static class PlayerGraphicsHooks
             sLeaser.sprites[bee.antennaeSprite].y = antennaePos.y;
             sLeaser.sprites[bee.antennaeSprite].element = Futile.atlasManager.GetElementWithName("BeeAntennaeHeadA" + headSpriteNumber);
             sLeaser.sprites[bee.antennaeSprite].color = antennaeColor;
+            sLeaser.sprites[bee.antennaeSprite].shader = FShader.defaultShader;
         }
 
         //-- Fluff stuff
@@ -370,11 +372,13 @@ public static class PlayerGraphicsHooks
         sLeaser.sprites[bee.floofSprite].x = floofPos.x;
         sLeaser.sprites[bee.floofSprite].y = floofPos.y;
         sLeaser.sprites[bee.floofSprite].color = fluffColor;
+        sLeaser.sprites[bee.floofSprite].shader = FShader.defaultShader;
 
         if (bee.IsBup)
         {
             sLeaser.sprites[bee.floofSprite].scaleY = 0.55f;
             sLeaser.sprites[bee.floofSprite].scaleX = 0.70f;
+            sLeaser.sprites[bee.floofSprite].color = new Color(0.8f, 0.8f, 0.8f);
         }
 
         if (bee.wingStamina < bee.LowWingStamina && !self.player.dead)
@@ -409,6 +413,7 @@ public static class PlayerGraphicsHooks
         sLeaser.sprites[bee.stingerSprite].rotation = Custom.VecToDeg(stingerAngle);
         sLeaser.sprites[bee.stingerSprite].color = stripeColor;
         sLeaser.sprites[bee.stingerSprite].isVisible = !bee.stingerUsed;
+        sLeaser.sprites[bee.stingerSprite].shader = FShader.defaultShader;
 
         //-- Stamina HUD stuff
         sLeaser.sprites[bee.staminaSprite].SetPosition(Vector2.Lerp(bee.staminaLastPos, bee.staminaPos, timeStacker) - camPos);
@@ -459,6 +464,7 @@ public static class PlayerGraphicsHooks
 
                 sLeaser.sprites[bee.WingSprite(k, j)].alpha = 0.6f;
                 sLeaser.sprites[bee.WingSprite(k, j)].color = wingColor;
+                sLeaser.sprites[bee.WingSprite(k, j)].shader = FShader.defaultShader;
 
                 if (bee.wingDeployment[k, j] == 1f)
                 {

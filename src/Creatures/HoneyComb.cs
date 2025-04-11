@@ -177,6 +177,7 @@ public class HoneyCombT : PlayerCarryableItem, IDrawable, IPlayerEdible
         Vector2 v = Vector3.Slerp(lastRotation, rotation, timeStacker);
         sLeaser.sprites[0].rotation = Custom.VecToDeg(v);
         sLeaser.sprites[0].element = Futile.atlasManager.GetElementWithName("HC" + bites);
+        sLeaser.sprites[0].shader = FShader.defaultShader;
         if (slatedForDeletetion || room != rCam.room)
         {
             sLeaser.CleanSpritesAndRemove();
