@@ -148,6 +148,7 @@ public static class BupHook
         cursor.EmitDelegate((FoodMeter self, int i) => ((Player)self.hud.owner).abstractCreature.Room.creatures[i].creatureTemplate.type == BeeEnums.CreatureType.Bup);
         cursor.Emit(OpCodes.Or);
     }
+
     private static bool Player_CanMaulCreature(On.Player.orig_CanMaulCreature orig, Player self, Creature crit)
     {
         var result = orig(self, crit);
