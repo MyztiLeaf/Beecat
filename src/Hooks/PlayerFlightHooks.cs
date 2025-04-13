@@ -14,10 +14,7 @@ public static class PlayerFlightHooks
     {
         orig(self);
 
-        if (!self.IsBee(out var bee))
-        {
-            return;
-        }
+        if (!self.IsBee(out var bee)) return;
 
         const float normalGravity = 0.9f;
         const float normalAirFriction = 0.999f;
@@ -26,6 +23,7 @@ public static class PlayerFlightHooks
         const float flightKickinDuration = 6f;
         int speedfly = 0;
         bool vertical = false;
+
         if (self.room.world.game.session is StoryGameSession session && !BeeOptions.VanillaType.Value)
         {
             var Data = session.saveState.miscWorldSaveData.GetSlugBaseData();
@@ -34,6 +32,7 @@ public static class PlayerFlightHooks
             vertical = Vertical;
             speedfly = check;
         }
+
         if (bee.CanFly)
         {
             
@@ -57,16 +56,33 @@ public static class PlayerFlightHooks
                 self.gravity = Mathf.Lerp(normalGravity, flightGravity, bee.currentFlightDuration / flightKickinDuration);
                 self.airFriction = Mathf.Lerp(normalAirFriction, flightAirFriction, bee.currentFlightDuration / flightKickinDuration);
 
-
+                //Right, Left
                 if (self.input[0].x > 0)
                 {
-                    self.bodyChunks[0].vel.x += bee.WingSpeed + speedfly;
-                    self.bodyChunks[1].vel.x -= 1f;
+                    self.bodyChunks[0].vel.x += bee.WingSpeed + speedfly - 0.3f;
+                    self.bodyChunks[1].vel.x -= 0.8f;
                 }
                 else if (self.input[0].x < 0)
                 {
-                    self.bodyChunks[0].vel.x -= bee.WingSpeed + speedfly;
-                    self.bodyChunks[1].vel.x += 1f;
+                    self.bodyChunks[0].vel.x -= bee.WingSpeed + speedfly - 0.3f;
+                    self.bodyChunks[1].vel.x += 0.8f;
+                }
+
+                //Up, Down, Still
+                if (self.input[0].y > 0)
+                {
+                    self.bodyChunks[0].vel.y += bee.WingSpeed + speedfly;
+                    self.bodyChunks[1].vel.y += 0.5f;
+                }
+                else if (self.input[0].y < 0)
+                {
+                    self.bodyChunks[0].vel.y -= bee.WingSpeed + speedfly;
+                    self.bodyChunks[1].vel.y += 0.8f;
+                }
+                else
+                {
+                    self.bodyChunks[0].vel.y += bee.WingSpeed + speedfly;
+                    self.bodyChunks[1].vel.y += 0.2f;
                 }
 
                 if (self.room.gravity <= 0.5)
@@ -87,12 +103,12 @@ public static class PlayerFlightHooks
                     if (self.input[0].y > 0)
                     {
                         self.bodyChunks[0].vel.y += bee.WingSpeedFly + speedfly + (bee.Adrenaline * 0.5f) * 0.75f;
-                        self.bodyChunks[1].vel.y -= 0.3f;
+                        self.bodyChunks[1].vel.y += 1f;
                     }
                     else if (self.input[0].y < 0)
                     {
-                        self.bodyChunks[0].vel.y -= bee.WingSpeedFly + speedfly + (bee.Adrenaline * 0.2f);
-                        self.bodyChunks[1].vel.y += 0.3f;
+                        self.bodyChunks[0].vel.y += bee.WingSpeedFly + speedfly + (bee.Adrenaline * 0.2f);
+                        self.bodyChunks[1].vel.y += 1f;
                     }
                 }
 

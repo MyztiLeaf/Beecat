@@ -6,6 +6,7 @@ using System.IO;
 using Fisobs.Core;
 using wa;
 using Beeworld;
+using BepInEx.Logging;
 
 [module: UnverifiableCode]
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -21,8 +22,13 @@ public class Plugin : BaseUnityPlugin
     public const string VERSION = "1.5.0";
     public const string AUTHORS = "Vigaro, MyztiLeaf";
 
+    public static new ManualLogSource Logger;
+
+    public static void DebugWarning(object message) => Logger.LogWarning(message);
+
     public void OnEnable()
     {
+        Logger = base.Logger;
         On.RainWorld.OnModsInit += RainWorld_OnOnModsInit;
         On.RainWorld.OnModsDisabled += RainWorld_OnModsDisabled;
     }
