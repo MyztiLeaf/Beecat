@@ -28,6 +28,10 @@ public static class IteratorMiscHooks
         if (!self.player.IsBee(out var _)) return;
         if (ModManager.MSC)
         {
+            var pearls = self.oracle.room.updateList
+                        .OfType<DataPearl>()
+                        .ToList();
+
             if (self.player.room != null && !BeeOptions.VanillaType.Value && self.player.room.world.game.session is StoryGameSession session)
             {
                 var Data = session.saveState.miscWorldSaveData.GetSlugBaseData();
@@ -67,7 +71,7 @@ public static class IteratorMiscHooks
                                 if (self.player.FreeHand() != -1)
                                 {
                                     self.player.SlugcatGrab(Beepearls.realizedObject, self.player.FreeHand());
-                                    foreach (var pearl in self.oracle.room.updateList.OfType<DataPearl>())
+                                    foreach (var pearl in pearls)
                                     {
                                         if (pearl.AbstractPearl.dataPearlType == BeeEnums.Datepearl.BeePearls)
                                         {
@@ -135,14 +139,14 @@ public static class IteratorMiscHooks
                     {
                         self.movementBehavior = SSOracleBehavior.MovementBehavior.Talk;
                         self.LockShortcuts();
-                        foreach (var pearl in self.oracle.room.updateList.OfType<DataPearl>())
+                        foreach (var pearl in pearls)
                         {
                             if (pearl.AbstractPearl.dataPearlType == BeeEnums.Datepearl.BeePearls && pearl.grabbedBy.FirstOrDefault()?.grabber is not Player && self.inActionCounter < 999)
                             {
                                 self.inActionCounter = 999;
                             }
                         }
-                        foreach (var pearl in self.oracle.room.updateList.OfType<DataPearl>())
+                        foreach (var pearl in pearls)
                         {
                             if (pearl.AbstractPearl.dataPearlType == BeeEnums.Datepearl.BeePearls && pearl.grabbedBy.FirstOrDefault()?.grabber is not Player)
                             {
@@ -163,8 +167,8 @@ public static class IteratorMiscHooks
                         {
                             for (var i = 0; i < self.player.grasps.Length; i++)
                             {
-                                self.conversation.Interrupt("...", 25);
-                                self.conversation.Destroy();
+                                self.conversation?.Interrupt("...", 25);
+                                self.conversation?.Destroy();
                                 self.conversation = null;
                                 if (self.player.grasps[i]?.grabbed?.abstractPhysicalObject is { } && self.player.grasps[i].grabbed is DataPearl WAS && WAS.AbstractPearl.dataPearlType == BeeEnums.Datepearl.BeePearls)
                                 {
@@ -209,7 +213,7 @@ public static class IteratorMiscHooks
                         {
                             self.InitateConversation(BeeEnums.Conversations.PearlRead, new SSOracleBehavior.SSOracleMeetWhite(self)); // what?
                         }
-                        foreach (var pearl in self.oracle.room.updateList.OfType<DataPearl>())
+                        foreach (var pearl in pearls)
                         {
                             if (pearl.AbstractPearl.dataPearlType == BeeEnums.Datepearl.BeePearls && pearl.grabbedBy.FirstOrDefault()?.grabber is not Player)
                             {
@@ -258,7 +262,7 @@ public static class IteratorMiscHooks
                                 Data.Set("FPMET", true);
                             }
                         }
-                        foreach (var pearl in self.oracle.room.updateList.OfType<DataPearl>())
+                        foreach (var pearl in pearls)
                         {
                             if (pearl.AbstractPearl.dataPearlType == BeeEnums.Datepearl.BeePearls)
                             {
