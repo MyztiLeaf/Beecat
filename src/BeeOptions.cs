@@ -16,7 +16,7 @@ public class BeeOptions : OptionsTemplate
     public static Configurable<float> FlightSpeed = Instance.config.Bind(nameof(FlightSpeed), 1f, new ConfigurableInfo("Flight Speed", new ConfigAcceptableRange<float>(0.1f, 10), "", "Flight Speed"));
     public static Configurable<bool> UnlimitedStingers = Instance.config.Bind(nameof(UnlimitedStingers), false, new ConfigurableInfo("Unlimited Stinger Usage", null, "", "Unlimited Stinger Usage"));
     public static Configurable<bool> VerticalFight = Instance.config.Bind(nameof(VerticalFight), false, new ConfigurableInfo("Unlock Vertical Flight", null, "", "Unlock Vertical Flight"));
-    public static Configurable<bool> VanillaType = Instance.config.Bind(nameof(VanillaType), true, new ConfigurableInfo("Keep as vanilla", null, "", "Keep as vanilla"));
+    public static Configurable<bool> VanillaType = Instance.config.Bind(nameof(VanillaType), false, new ConfigurableInfo("Keep as vanilla", null, "", "Keep as vanilla"));
 
     public static Configurable<float> BupsSpawnRate = Instance.config.Bind(nameof(BupsSpawnRate), 0.1f, new ConfigurableInfo("Bups Spawnrate (enable top one)", new ConfigAcceptableRange<float>(0.1f, 1), "", "Bups Spawnrate (enable top one)"));
     public static Configurable<bool> BupsSpawnAll = Instance.config.Bind(nameof(BupsSpawnAll), false, new ConfigurableInfo("Enable Bups to spawn in all campaign", null, "", "Enable Bups to spawn in all campaign"));
