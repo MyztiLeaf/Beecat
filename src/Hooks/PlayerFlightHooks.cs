@@ -19,7 +19,7 @@ public static class PlayerFlightHooks
         const float normalGravity = 0.9f;
         const float normalAirFriction = 0.999f;
         const float flightGravity = 0.12f;
-        const float flightAirFriction = 0.7f;
+        const float flightAirFriction = 0.04f;
         const float flightKickinDuration = 6f;
         int speedfly = 0;
         bool vertical = false;
@@ -47,6 +47,14 @@ public static class PlayerFlightHooks
 
             if (bee.isFlying)
             {
+                for (int i = 0; i < self.bodyChunks.Length; i++)
+                {
+                    self.bodyChunks[i].vel.y = 0f;
+                    if (i == 1)
+                    {
+                        self.bodyChunks[i].vel.x = 0f;
+                    }
+                }   
                 bee.flyingBuzzSound.Volume = Mathf.Lerp(0f, 1f, bee.currentFlightDuration / flightKickinDuration);
 
                 bee.currentFlightDuration++;
