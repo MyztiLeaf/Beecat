@@ -8,12 +8,12 @@ public static class PlayerFlightHooks
     public static void Apply()
     {
         //On.Player.UpdateMSC += Player_UpdateMSC;
-        On.Player.WatcherUpdate += Player_WatcherUpdate;
+        On.Player.JollyUpdate += Player_JollyUpdate;
     }
 
-    private static void Player_WatcherUpdate(On.Player.orig_WatcherUpdate orig, Player self)
+    private static void Player_JollyUpdate(On.Player.orig_JollyUpdate orig, Player self, bool eu)
     {
-        orig(self);
+        orig(self, eu);
 
         if (!self.IsBee(out var bee)) return;
 
@@ -23,7 +23,6 @@ public static class PlayerFlightHooks
         const float flightAirFriction = 0.04f;
         const float flightKickinDuration = 6f;
         int speedfly = 0;
-        float speedWatch = 10;
         bool vertical = false;
 
         if (self.room.world.game.session is StoryGameSession session && !BeeOptions.VanillaType.Value)
@@ -57,46 +56,54 @@ public static class PlayerFlightHooks
 
                 self.gravity = Mathf.Lerp(normalGravity, flightGravity, bee.currentFlightDuration / flightKickinDuration);
                 self.airFriction = Mathf.Lerp(normalAirFriction, flightAirFriction, bee.currentFlightDuration / flightKickinDuration);
+                if (bee.currentFlightDuration >= flightKickinDuration)
+                {
+                    bee.speedWatch = Mathf.Clamp(bee.speedWatch += 25, 0, 100);
+                }
+                else
+                {
+                    bee.speedWatch = 0;
+                }
 
                 //Right, Left
                 if (self.input[0].x > 0)
                 {
-                    self.bodyChunks[0].vel.x += bee.WingSpeed + speedWatch + speedfly - 0.3f;
+                    self.bodyChunks[0].vel.x += bee.WingSpeed + bee.speedWatch + speedfly - 0.3f;
                     self.bodyChunks[1].vel.x -= 0.8f;
                 }
                 else if (self.input[0].x < 0)
                 {
-                    self.bodyChunks[0].vel.x -= bee.WingSpeed + speedWatch + speedfly - 0.3f;
+                    self.bodyChunks[0].vel.x -= bee.WingSpeed + bee.speedWatch + speedfly - 0.3f;
                     self.bodyChunks[1].vel.x += 0.8f;
                 }
 
                 //Up, Down, Still
                 if (self.input[0].y > 0)
                 {
-                    self.bodyChunks[0].vel.y += bee.WingSpeed + speedWatch + speedfly;
+                    self.bodyChunks[0].vel.y += bee.WingSpeed + bee.speedWatch + speedfly;
                     self.bodyChunks[1].vel.y += 0.5f;
                 }
                 else if (self.input[0].y < 0)
                 {
-                    self.bodyChunks[0].vel.y -= bee.WingSpeed + speedWatch + speedfly;
+                    self.bodyChunks[0].vel.y -= bee.WingSpeed + bee.speedWatch + speedfly;
                     self.bodyChunks[1].vel.y += 0.8f;
                 }
                 else
                 {
-                    self.bodyChunks[0].vel.y += bee.WingSpeed + speedWatch + speedfly;
-                    self.bodyChunks[1].vel.y += 0.2f;
+                    self.bodyChunks[0].vel.y += bee.WingSpeed + speedfly;
+                    self.bodyChunks[1].vel.y += 0.01f;
                 }
 
                 if (self.room.gravity <= 0.5)
                 {
                     if (self.input[0].y > 0)
                     {
-                        self.bodyChunks[0].vel.y += bee.WingSpeed + speedWatch + speedfly;
+                        self.bodyChunks[0].vel.y += bee.WingSpeed + bee.speedWatch + speedfly;
                         self.bodyChunks[1].vel.y -= 1f;
                     }
                     else if (self.input[0].y < 0)
                     {
-                        self.bodyChunks[0].vel.y -= bee.WingSpeed + speedWatch + speedfly;
+                        self.bodyChunks[0].vel.y -= bee.WingSpeed + bee.speedWatch + speedfly;
                         self.bodyChunks[1].vel.y += 1f;
                     }
                 }
@@ -104,12 +111,12 @@ public static class PlayerFlightHooks
                 {
                     if (self.input[0].y > 0)
                     {
-                        self.bodyChunks[0].vel.y += bee.WingSpeedFly + speedfly + (bee.Adrenaline * 0.5f) * 0.75f;
+                        self.bodyChunks[0].vel.y += bee.WingSpeedFly + bee.speedWatch + (bee.Adrenaline * 0.5f) * 0.75f;
                         self.bodyChunks[1].vel.y += 1f;
                     }
                     else if (self.input[0].y < 0)
                     {
-                        self.bodyChunks[0].vel.y += bee.WingSpeedFly + speedfly + (bee.Adrenaline * 0.2f);
+                        self.bodyChunks[0].vel.y += bee.WingSpeedFly + bee.speedWatch + (bee.Adrenaline * 0.2f);
                         self.bodyChunks[1].vel.y += 1f;
                     }
                 }
