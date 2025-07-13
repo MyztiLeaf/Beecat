@@ -81,6 +81,7 @@ public class BeePlayerData
     public Vector2 zRotation;
     public Vector2 lastZRotation;
     public float wingYAdjust;
+    public float speedWatch;
 
     public readonly Player player;
 

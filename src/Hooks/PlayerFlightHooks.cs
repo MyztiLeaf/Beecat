@@ -7,7 +7,167 @@ public static class PlayerFlightHooks
 {
     public static void Apply()
     {
-        On.Player.UpdateMSC += Player_UpdateMSC;
+        //On.Player.UpdateMSC += Player_UpdateMSC;
+        On.Player.JollyUpdate += Player_JollyUpdate;
+    }
+
+    private static void Player_JollyUpdate(On.Player.orig_JollyUpdate orig, Player self, bool eu)
+    {
+        orig(self, eu);
+
+        if (!self.IsBee(out var bee)) return;
+
+        const float normalGravity = 0.9f;
+        const float normalAirFriction = 0.999f;
+        const float flightGravity = 0.12f;
+        const float flightAirFriction = 0.04f;
+        const float flightKickinDuration = 6f;
+        int speedfly = 0;
+        bool vertical = false;
+
+        if (self.room.world.game.session is StoryGameSession session && !BeeOptions.VanillaType.Value)
+        {
+            var Data = session.saveState.miscWorldSaveData.GetSlugBaseData();
+            Data.TryGet("WingSpeed", out int check);
+            Data.TryGet("VerticalFly", out bool Vertical);
+            vertical = Vertical;
+            speedfly = check;
+        }
+
+        if (bee.CanFly)
+        {
+
+            if (self.animation == Player.AnimationIndex.HangFromBeam)
+            {
+                bee.preventFlight = 15;
+            }
+            else if (bee.preventFlight > 0)
+            {
+                bee.preventFlight--;
+            }
+
+            if (bee.isFlying)
+            {
+                bee.flyingBuzzSound.Volume = Mathf.Lerp(0f, 1f, bee.currentFlightDuration / flightKickinDuration);
+
+                bee.currentFlightDuration++;
+
+                self.AerobicIncrease(0.08f);
+
+                self.gravity = Mathf.Lerp(normalGravity, flightGravity, bee.currentFlightDuration / flightKickinDuration);
+                self.airFriction = Mathf.Lerp(normalAirFriction, flightAirFriction, bee.currentFlightDuration / flightKickinDuration);
+                if (bee.currentFlightDuration >= flightKickinDuration)
+                {
+                    bee.speedWatch = Mathf.Clamp(bee.speedWatch += 25, 0, 100);
+                }
+                else
+                {
+                    bee.speedWatch = 0;
+                }
+
+                //Right, Left
+                if (self.input[0].x > 0)
+                {
+                    self.bodyChunks[0].vel.x += bee.WingSpeed + bee.speedWatch + speedfly - 0.3f;
+                    self.bodyChunks[1].vel.x -= 0.8f;
+                }
+                else if (self.input[0].x < 0)
+                {
+                    self.bodyChunks[0].vel.x -= bee.WingSpeed + bee.speedWatch + speedfly - 0.3f;
+                    self.bodyChunks[1].vel.x += 0.8f;
+                }
+
+                //Up, Down, Still
+                if (self.input[0].y > 0)
+                {
+                    self.bodyChunks[0].vel.y += bee.WingSpeed + bee.speedWatch + speedfly;
+                    self.bodyChunks[1].vel.y += 0.5f;
+                }
+                else if (self.input[0].y < 0)
+                {
+                    self.bodyChunks[0].vel.y -= bee.WingSpeed + bee.speedWatch + speedfly;
+                    self.bodyChunks[1].vel.y += 0.8f;
+                }
+                else
+                {
+                    self.bodyChunks[0].vel.y += bee.WingSpeed + speedfly;
+                    self.bodyChunks[1].vel.y += 0.01f;
+                }
+
+                if (self.room.gravity <= 0.5)
+                {
+                    if (self.input[0].y > 0)
+                    {
+                        self.bodyChunks[0].vel.y += bee.WingSpeed + bee.speedWatch + speedfly;
+                        self.bodyChunks[1].vel.y -= 1f;
+                    }
+                    else if (self.input[0].y < 0)
+                    {
+                        self.bodyChunks[0].vel.y -= bee.WingSpeed + bee.speedWatch + speedfly;
+                        self.bodyChunks[1].vel.y += 1f;
+                    }
+                }
+                else if (bee.UnlockedVerticalFlight || vertical)
+                {
+                    if (self.input[0].y > 0)
+                    {
+                        self.bodyChunks[0].vel.y += bee.WingSpeedFly + bee.speedWatch + (bee.Adrenaline * 0.5f) * 0.75f;
+                        self.bodyChunks[1].vel.y += 1f;
+                    }
+                    else if (self.input[0].y < 0)
+                    {
+                        self.bodyChunks[0].vel.y += bee.WingSpeedFly + bee.speedWatch + (bee.Adrenaline * 0.2f);
+                        self.bodyChunks[1].vel.y += 1f;
+                    }
+                }
+
+                bee.wingStaminaRecoveryCooldown = 40;
+                bee.wingStamina--;
+
+                if (self.isNPC)
+                {
+                    if (!bee.CanSustainFlight())
+                    {
+                        bee.StopFlight();
+                    }
+                }
+                else
+                {
+                    if (!self.input[0].jmp || !bee.CanSustainFlight())
+                    {
+                        bee.StopFlight();
+                    }
+                }
+
+
+
+            }
+            else
+            {
+                bee.flyingBuzzSound.Volume = Mathf.Lerp(1f, 0f, bee.timeSinceLastFlight / flightKickinDuration);
+
+                bee.timeSinceLastFlight++;
+
+                bee.flyingBuzzSound.Volume = 0f;
+
+                if (bee.wingStaminaRecoveryCooldown > 0)
+                {
+                    bee.wingStaminaRecoveryCooldown--;
+                }
+                else
+                {
+                    bee.wingStamina = Mathf.Min(bee.wingStamina + bee.WingStaminaRecovery, bee.WingStaminaMax);
+                }
+
+                if (self.wantToJump > 0 && bee.wingStamina > bee.MinimumFlightStamina && bee.CanSustainFlight())
+                {
+                    bee.InitiateFlight();
+                }
+
+                self.airFriction = normalAirFriction;
+                self.gravity = normalGravity;
+            }
+        }
     }
 
     private static void Player_UpdateMSC(On.Player.orig_UpdateMSC orig, Player self)
@@ -19,7 +179,7 @@ public static class PlayerFlightHooks
         const float normalGravity = 0.9f;
         const float normalAirFriction = 0.999f;
         const float flightGravity = 0.12f;
-        const float flightAirFriction = 0.7f;
+        const float flightAirFriction = 0.04f;
         const float flightKickinDuration = 6f;
         int speedfly = 0;
         bool vertical = false;
